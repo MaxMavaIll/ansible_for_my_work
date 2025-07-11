@@ -1,0 +1,42 @@
+- name: Prepare and transfer consensus data
+  hosts: oasis_temerald
+  become: yes
+  tasks:
+    # - name: Stop oasis-testnet-emerald {{ user_dir }}
+    #   ansible.builtin.command:
+    #     cmd: systemctl stop oasis-testnet-emerald
+
+    # - name: Copy consensus data to SNAP folder
+    #   ansible.builtin.command:
+    #     cmd: cp -r {{ user_dir }}/node/data/consensus {{ user_dir }}/SNAP
+
+    # - name: Stop oasis-testnet-emerald
+    #   ansible.builtin.command:
+    #     cmd: systemctl start oasis-testnet-emerald
+
+    # - name: Remove oasis_priv_validator.json
+    #   ansible.builtin.file:
+    #     path: "{{ user_dir }}/SNAP/consensus/oasis_priv_validator.json"
+    #     state: absent
+
+    - name: Copy consensus folder to oasis_tsapphire {{ hostvars['oasis_tsapphire']['user_name'] }}@{{ hostvars['oasis_tsapphire']['ansible_host'] }}:{{ hostvars['oasis_tsapphire']['user_dir'] }}
+      ansible.builtin.command: >
+        rsync -avz {{ user_dir }}/SNAP/consensus/
+        {{ hostvars['oasis_tsapphire']['user_name'] }}@{{ hostvars['oasis_tsapphire']['ansible_host'] }}:{{ hostvars['oasis_tsapphire']['user_dir'] }}
+
+# - name: Deploy consensus data on oasis_tsapphire
+#   hosts: oasis_tsapphire
+#   become: yes
+#   tasks:
+#     - name: Stop sapphire service
+#       ansible.builtin.command:
+#         cmd: systemctl stop sapphire
+
+#     - name: Remove old consensus directory
+#       ansible.builtin.file:
+#         path: /home/sapphire/node/data/consensus
+#         state: absent
+
+#     - name: Start sapphire service
+#       ansible.builtin.command:
+#         cmd: systemctl start sapphire

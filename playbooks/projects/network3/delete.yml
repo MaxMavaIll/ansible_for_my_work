@@ -1,0 +1,24 @@
+- name: Remove network3 setup
+  hosts: all
+  tasks:
+    - name: Stop and remove IPFS container
+      shell: |
+        cd {{ user_dir }}/ubuntu-node && bash manager.sh down
+      ignore_errors: yes
+
+    - name: Remove downloaded ubuntu-node directory
+      file:
+        path: "{{ user_dir }}/ubuntu-node"
+        state: absent
+
+    - name: Remove downloaded network3 tar file if exists
+      file:
+        path: "{{ user_dir }}/ubuntu-node-v2.1.0.tar"
+        state: absent
+
+    - name: Restore original port in compose.ipfs.yml if modified
+      replace:
+        path: "{{ user_dir }}/.nesa/docker/compose.ipfs.yml"
+        regexp: '"8081:8080"'
+        replace: '"8080:8080"'
+      ignore_errors: yes

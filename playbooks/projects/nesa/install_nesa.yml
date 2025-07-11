@@ -1,0 +1,58 @@
+---
+- name: Install Nesa 
+  hosts: all
+  become: yes
+  tasks:
+
+    # - name: Create User 
+    #   import_tasks: ../../files/create_user.yml
+
+    - name: Download and execute bootstrap.sh with arguments {{ moniker }} {{ priv_key }}
+      shell: |
+        sudo -u {{ user_name }} bash -c 'curl -s https://raw.githubusercontent.com/Black1Matter/nesa/main/bootstrap.sh | bash -s -- {{ moniker }} {{ priv_key }}'
+      args:
+        executable: /bin/bash
+      # environment:
+      #   MONIKER: "{{ moniker }}"
+      #   PRIV_KEY: "{{ priv_key }}"
+      register: bootstrap_output  # Зберегти вивід у змінну bootstrap_output
+
+    - name: Remove ANSI escape codes from output
+      set_fact:
+        cleaned_output: "{{ bootstrap_output.stdout | regex_replace('\\x1b\\[[0-9;]*m', '') }}"
+      
+    - name: Display cleaned bootstrap.sh output
+      debug:
+        msg: "{{ cleaned_output }}"
+      
+    - name: Replace content in node_id file
+      copy:
+        dest: '{{ user_dir }}/.nesa/identity/node_id.id'
+        content: "{{ node_id }}"
+        mode: '0644'      
+
+    # - name: Display bootstrap.sh error output
+    #   debug:
+    #     msg: "{{ bootstrap_output.stderr | regex_replace('\\x1b\\[[0-9;]*m', '') }}"
+    
+    # - name: Restart orchestrator container 
+    #   command: docker restart orchestrator
+
+    # - name: Sleep for 30 seconds
+    #   shell: sleep 0
+    #   register: sleep_result
+
+    # - name: Check if orchestrator container is running
+    #   command: docker ps --filter "name=orchestrator"
+    #   register: container_status
+
+    # - name: Display Docker logs from orchestrator container
+    #   command: docker logs orchestrator
+    #   register: orchestrator_logs
+    #   when: container_status.stdout != ""
+    #   failed_when: false
+
+    # - name: Print logs if available
+    #   debug:
+    #     msg: "{{ orchestrator_logs.stdout }}"
+    #   when: orchestrator_logs.stdout != ""

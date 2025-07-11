@@ -1,0 +1,15 @@
+# need custom install
+network: quasar
+folder: '.quasarnode'
+daemon: quasarnoded
+chain_id: quasar-test-1
+node_version: v0.1.0
+repo: https://github.com/quasar-finance/quasar-preview
+genesis: https://raw.githubusercontent.com/quasar-finance/networks/main/quasar-test-1/definitive-genesis.json
+peers: '265bc06fe615ee1851a11ca41c861bd0e501da56@34.175.185.244:26656'
+custom_port_prefix: 182
+
+# [Optional] Snapshot
+snapshot_hour: 1
+snapshot_minute: 30
+wasm: 'outside'

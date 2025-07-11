@@ -1,0 +1,18 @@
+server {
+    if ($host = *-rpc.w3coins.io) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+	if ($host = *-api.w3coins.io) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+	listen 80;
+{% if type == 'test' or  type == 'testrelay' %}
+    server_name {{network}}-testnet-rpc.w3coins.io, {{network}}-testnet-api.w3coins.io;
+{% else %}
+    server_name {{network}}-rpc.w3coins.io, {{network}}-api.w3coins.io;
+{% endif %}
+    return 404; # managed by Certbot
+
+}

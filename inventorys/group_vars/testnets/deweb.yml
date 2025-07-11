@@ -1,0 +1,14 @@
+network: deweb
+folder: '.deweb'
+daemon: dewebd
+chain_id: deweb-testnet-sirius
+node_version: v0.3.1
+repo: https://github.com/deweb-services/deweb.git
+genesis: 'https://raw.githubusercontent.com/deweb-services/deweb/main/genesis.json'
+minimum_gas_price: '0.0udws'
+seeds: 'ade4d8bc8cbe014af6ebdf3cb7b1e9ad36f412c0@testnet-seeds.polkachu.com:11456'
+custom_port_prefix: 114
+
+# [Optional] Snapshot
+snapshot_hour: 3
+snapshot_minute: 0

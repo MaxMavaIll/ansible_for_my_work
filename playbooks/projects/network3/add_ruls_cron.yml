@@ -1,0 +1,27 @@
+---
+- name: Setup cron jobs for scripts
+  hosts: all
+  become: yes  # використання прав root
+
+  tasks:
+    - name: Create start_after_reboot.sh script
+      copy:
+        dest: /root/start_after_reboot.sh
+        content: |
+          #!/bin/bash
+          (cd /root/ubuntu-node && /root/ubuntu-node/manager.sh up)
+        mode: '0755'
+
+    - name: Schedule manager.sh to run every 10 minutes
+      cron:
+        name: "Run manager.sh every 10 minutes"
+        minute: "0"
+        job: "bash -c 'cd /root/ubuntu-node && /root/ubuntu-node/manager.sh up' # start network3 for 10 minutes"
+        state: present
+
+    - name: Schedule script to run at reboot
+      cron:
+        name: "Run script on reboot"
+        special_time: reboot
+        job: "/root/start_after_reboot.sh"
+        state: present

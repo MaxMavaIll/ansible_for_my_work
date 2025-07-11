@@ -1,0 +1,4 @@
+{{ ansible_user }} ALL= NOPASSWD: /bin/systemctl restart {{ network }}{{ prefix_network }}.service
+{{ ansible_user }} ALL= NOPASSWD: /bin/systemctl stop {{ network }}{{ prefix_network }}.service
+{{ ansible_user }} ALL= NOPASSWD: /bin/systemctl start {{ network }}{{ prefix_network }}.service
+{{ ansible_user }} ALL= NOPASSWD: /bin/systemctl status {{ network }}{{ prefix_network }}.service

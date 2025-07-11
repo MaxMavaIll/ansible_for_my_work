@@ -1,0 +1,29 @@
+- name: network3 Reboot
+  hosts: all
+  become: yes
+  tasks:
+    - name: Stop network3 
+      shell: cd {{ user_dir }}/ubuntu-node && sudo bash manager.sh down && sleep 4
+      async: 10
+      poll: 0
+
+    - name: Pause for 1 seconds
+      pause:
+        seconds: 1
+    
+    - name: Start network3 
+      shell: cd {{ user_dir }}/ubuntu-node && sudo bash manager.sh up
+      async: 10
+      poll: 0
+
+    - name: Pause for 5 seconds
+      pause:
+        seconds: 5
+  
+    - name: Run netstat and grep for port 8080
+      ansible.builtin.shell: "netstat -tulpn | grep 8080"
+      register: result
+
+    - name: Print the output
+      ansible.builtin.debug:
+        msg: "{{ result.stdout_lines }}"

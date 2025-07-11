@@ -1,0 +1,54 @@
+---
+- name: Manage Bostrom Docker container
+  hosts: all
+  become: yes
+  tasks:
+    - name: Pull Docker image
+      docker_image:
+        name: cyberd/bostrom
+        tag: '{{ version }}'
+        source: pull
+
+    - name: Stop existing Bostrom container if running
+      docker_container:
+        name: bostrom
+        state: stopped
+        force_kill: yes
+      ignore_errors: yes  # Ігнорує помилки, якщо контейнер вже зупинений або не існує
+
+    - name: Remove existing Bostrom container if present
+      docker_container:
+        name: bostrom
+        state: absent
+      ignore_errors: yes  # Ігнорує помилки, якщо контейнер не існує
+
+    # - name: Run new Bostrom container with GPU support
+    #   docker_container:
+    #     name: bostrom
+    #     image: 'cyberd/bostrom:{{ version }}'
+    #     state: started
+    #     restart_policy: always
+    #     detach: yes
+    #     runtime: nvidia  # Використовується для підтримки GPU
+    #     published_ports:
+    #       - "26656:26656"
+    #       - "26657:26657"
+    #       - "1317:1317"
+    #     volumes:
+    #       - "{{ user_dir }}/.cyber:/root/.cyber"
+    #     env:
+    #       ALLOW_SEARCH: "true"
+
+    - name: Run new Bostrom container with GPU support
+      shell: |
+        docker run -d --gpus all --name=bostrom --restart always -p 26656:26656 -p 26657:26657 -p 1317:1317 -e ALLOW_SEARCH=true -v {{ user_dir }}/.cyber:/root/.cyber  cyberd/bostrom:{{ version }}
+
+    - name: Change directory to Cosmovisor and list structure
+      command: "tree"
+      args:
+        chdir: "{{ user_dir }}/.cyber/cosmovisor"
+      register: tree_output
+
+    - name: Show Cosmovisor directory structure
+      debug:
+        var: tree_output.stdout

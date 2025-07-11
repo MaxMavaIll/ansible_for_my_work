@@ -1,0 +1,111 @@
+---
+- name: Setup and deploy infernet-container-starter part 1
+  hosts: all
+
+  tasks:
+    - name: Remove the infernet-container-starter directory
+      file:
+        path: "{{ user_dir }}/infernet-container-starter"
+        state: absent
+
+    - name: Clean existing infernet-container-starter directory
+      git:
+        repo: https://github.com/ritual-net/infernet-container-starter
+        dest: "{{ user_dir }}/infernet-container-starter"
+        force: yes
+        clone: yes
+      register: git_clone
+
+    - name: Run commands in a detached screen session
+      shell: screen -dmS consensus bash -c "cd {{ user_dir }}/infernet-container-starter && project=hello-world make deploy-container"
+
+    - name: Sleep for 30 seconds
+      shell: sleep 30
+      register: sleep_result
+
+    - name: Update config.json with new settings
+      shell: |
+        jq ".chain.rpc_url = \"{{ NEW_RPC_URL }}\" | .chain.registry_address = \"{{ NEW_COORDINATOR_ADDRESS }}\" | .chain.wallet.private_key = \"0x{{ NEW_PRIVATE_KEY }}\"" {{ user_dir }}/infernet-container-starter/deploy/config.json > {{ user_dir }}/infernet-container-starter/deploy/config.tmp.json
+      register: jq_update
+
+    - name: Move config.tmp.json > config.json 
+      shell:
+        cmd: mv config.tmp.json config.json
+        chdir: '{{ user_dir }}/infernet-container-starter/deploy'
+    
+    - name: Update Makefile with new settings
+      shell: |
+        sed -i -e "s|0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a|0x{{ NEW_PRIVATE_KEY }}|" \
+        -e "s|http://localhost:8545|{{ NEW_RPC_URL }}|" {{ user_dir }}/infernet-container-starter/projects/hello-world/contracts/Makefile
+      register: jq_update
+    
+    - name: Update Deploy.s.sol with new settings
+      shell: |
+        sed -i -e "s|0x663F3ad617193148711d28f5334eE4Ed07016602|{{ NEW_COORDINATOR_ADDRESS }}|" {{ user_dir }}/infernet-container-starter/projects/hello-world/contracts/script/Deploy.s.sol
+      register: jq_update
+
+    # - name: Update Makefile with new private key and RPC URL
+    #   replace:
+    #     path: "{{ user_dir }}/infernet-container-starter/projects/hello-world/contracts/Makefile"
+    #     regexp: "{{ item.regexp }}"
+    #     replace: "{{ item.replace }}"
+    #   loop:
+    #     - { regexp: "0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a", replace: "0x{{ NEW_PRIVATE_KEY }}" }
+    #     - { regexp: "http://localhost:8545", replace: "{{ NEW_RPC_URL }}" }
+
+    # - name: Update Solidity deployment script address
+    #   replace:
+    #     path: "{{ user_dir }}/infernet-container-starter/projects/hello-world/contracts/script/Deploy.s.sol"
+    #     regexp: '0x663F3ad617193148711d28f5334eE4Ed07016602'
+    #     replace: '{{ NEW_COORDINATOR_ADDRESS }}'
+
+    - name: Install Foundry
+      shell: |
+        mkdir -p {{ user_dir }}/foundry
+
+    - name: Download and execute Foundry install script
+      become_user: ritual
+      shell:
+        cmd: |
+          sudo -u ritual bash -c 'curl -L https://foundry.paradigm.xyz | bash'
+        chdir: '{{ user_dir }}/foundry'
+        executable: /bin/bash
+      register: foundry_install_output
+
+    - name: Show Foundry installation output
+      ansible.builtin.debug:
+        var: foundry_install_output.stdout
+    
+    - name: Source .bashrc to update PATH and install Foundry tools
+      ansible.builtin.shell:
+        cmd: |
+          sudo -u ritual bash -c 'source ~/.bashrc && {{ user_dir }}/.foundry/bin/foundryup'
+        executable: /bin/bash
+        chdir: '{{ user_dir }}/foundry'
+      environment:
+        PATH: '{{ path }}:{{ user_dir }}/.foundry/bin'
+
+    - name: Install dependencies using Forge
+      shell: 
+        cmd: |
+          cd {{ user_dir }}/infernet-container-starter/projects/hello-world/contracts
+          rm -r lib/*
+          forge install --no-commit foundry-rs/forge-std
+          forge install --no-commit ritual-net/infernet-sdk
+        chdir: '{{ user_dir }}/foundry'
+      environment:
+        PATH: '{{ path }}:{{ user_dir }}/.foundry/bin'
+
+    - name: Deploy contracts and display output
+      shell: 
+        cmd: |
+          cd {{ user_dir }}/infernet-container-starter
+          make deploy-contracts project=hello-world
+        chdir: '{{ user_dir }}/foundry'
+      register: deployment_output
+      environment:
+        PATH: '{{ path }}:{{ user_dir }}/.foundry/bin'
+
+    - name: Display deployment output
+      debug:
+        msg: "{{ deployment_output.stdout }}"

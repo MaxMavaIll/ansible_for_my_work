@@ -1,0 +1,19 @@
+network: lambdavm
+folder: '.lambdavm'
+daemon: lambdavm
+chain_id: lambda_92000-1
+node_version: v1.0.1
+repo: https://github.com/LambdaIM/lambdavm
+genesis: https://raw.githubusercontent.com/LambdaIM/mainnet/main/lambda_92000-1/genesis.json
+#genesis_processing: targz
+seeds: ''
+peers: 'ebdd47f7babb184240258d2fc6fba61bd994edaa@lambda.peer.stavr.tech:31326,2c4f8e193fd10ab3a2bc919b484fd1c78eceffb3@13.213.214.88:26656'
+minimum_gas_price: '0.01ulamb'
+#custom_port_prefix: 214
+upgrade_folder: 'v1.0.1'
+update_website_immediately: false
+gas_params: '--fees 3500ulamb'
+
+# [Optional] Snapshot
+snapshot_hour: 24
+snapshot_minute: 0

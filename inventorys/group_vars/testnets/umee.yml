@@ -1,0 +1,15 @@
+network: umee
+folder: '.umee'
+daemon: umeed
+chain_id: canon-3
+repo: https://github.com/umee-network/umee.git
+genesis: 'https://snapshots-testnet.stake-town.com/umee/genesis.json'
+seeds: ''
+peers: '56d3b17ccbd6c095a2eb39462101545ca687901d@65.109.65.248:29656'
+minimum_gas_price: '0uumee'
+#custom_port_prefix: 136
+update_website_immediately: true
+
+# [Optional] Snapshot
+snapshot_hour: 2
+snapshot_minute: 0

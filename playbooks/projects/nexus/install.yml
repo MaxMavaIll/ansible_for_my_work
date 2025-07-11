@@ -1,0 +1,56 @@
+---
+- name: Install and configure Nexus service
+  hosts: all
+  become: true
+  tasks:
+    - name: Install required packages
+      apt:
+        name:
+          - build-essential
+          - pkg-config
+          - libssl-dev
+          - git-all
+          - protobuf-compiler
+        state: present
+        update_cache: yes
+
+    - name: Download and execute Nexus install script
+      shell: |
+        curl https://raw.githubusercontent.com/Black1Matter/nexus/refs/heads/main/install.sh | sh
+      args:
+        executable: /bin/bash
+
+    - name: rustup update
+      shell: |
+        {{user_dir}}/.cargo/bin/rustup update
+      args:
+        executable: /bin/bash
+
+    - name: Create Nexus service file
+      copy:
+        dest: /etc/systemd/system/nexus.service
+        content: |
+          [Unit]
+          Description=Run prover command
+          After=network.target
+
+          [Service]
+          User={{ user_name }}
+          WorkingDirectory={{ user_dir }}/.nexus/network-api/clients/cli
+          ExecStart={{ user_dir }}/.cargo/bin/cargo run --release --bin prover -- beta.orchestrator.nexus.xyz
+          Restart=on-failure
+
+          [Install]
+          WantedBy=multi-user.target
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: Reload systemd manager configuration
+      command: systemctl daemon-reload
+
+    - name: Enable Nexus service at boot
+      systemd:
+        name: nexus.service
+        enabled: yes
+        state: started

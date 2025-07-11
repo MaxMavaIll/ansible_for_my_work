@@ -1,0 +1,50 @@
+- name: Управління Nillion Accuser
+  hosts: all
+  tasks:
+    - name: Копіювання credentials.json у резервну копію
+      copy:
+        src: ~/nillion/accuser/credentials.json
+        dest: ~/credentials_bk.json
+        remote_src: yes
+
+    - name: Видалити папку ~/nillion/accuser
+      file:
+        path: ~/nillion/accuser
+        state: absent
+
+    - name: Створити нову папку ~/nillion/accuser
+      file:
+        path: ~/nillion/accuser
+        state: directory
+        mode: '0755'
+
+    - name: Повернути резервну копію credentials.json у нову папку
+      copy:
+        src: ~/credentials_bk.json
+        dest: ~/nillion/accuser/credentials.json
+        remote_src: yes
+
+    - name: Отримати список контейнерів з образом nillion/retailtoken-accuser:v1.0.0
+      command: docker ps -aq --filter ancestor=nillion/retailtoken-accuser:v1.0.0
+      register: container_ids
+
+    - name: Зупинити контейнер(и)
+      when: container_ids.stdout != ''
+      command: docker stop {{ item }}
+      loop: "{{ container_ids.stdout_lines }}"
+
+    - name: Видалити контейнер(и)
+      when: container_ids.stdout != ''
+      command: docker rm {{ item }}
+      loop: "{{ container_ids.stdout_lines }}"
+
+    - name: Запустити новий Docker контейнер
+      community.docker.docker_container:
+        name: nillion
+        image: nillion/retailtoken-accuser:v1.0.0
+        command: "accuse --rpc-endpoint 'https://nillion-testnet-rpc.w3coins.io' --block-start 5445354"
+        volumes:
+          - "{{ ansible_env.HOME }}/nillion/accuser:/var/tmp"
+        state: started
+        detach: true
+        restart_policy: always

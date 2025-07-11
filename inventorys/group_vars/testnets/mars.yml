@@ -1,0 +1,15 @@
+network: mars
+folder: '.mars'
+daemon: marsd
+chain_id: 'ares-1'
+node_version: 'v2.0.0-rc0'
+repo: 'https://github.com/mars-protocol/hub'
+genesis: 'https://raw.githubusercontent.com/mars-protocol/networks/main/ares-1/genesis.json'
+seeds: 'ade4d8bc8cbe014af6ebdf3cb7b1e9ad36f412c0@testnet-seeds.polkachu.com:18556'
+custom_port_prefix: 185
+upgrade_folder: v2
+
+# [Optional] Snapshot
+snapshot_hour: 2
+snapshot_minute: 0
+wasm: 'inside'

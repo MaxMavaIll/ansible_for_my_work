@@ -1,0 +1,19 @@
+- name: Update Nexus service
+  hosts: all
+  become: true
+  tasks:
+    - name: Download and execute Nexus install script
+      shell: |
+        curl https://raw.githubusercontent.com/Black1Matter/nexus/refs/heads/main/install.sh | sh
+      args:
+        executable: /bin/bash
+
+    - name: Enable Nexus service at boot
+      systemd:
+        name: nexus.service
+        state: stopped
+
+    - name: Enable Nexus service at boot
+      systemd:
+        name: nexus.service
+        state: started

@@ -1,0 +1,13 @@
+network: babylon
+folder: '.babylond'
+daemon: babylond
+chain_id: bbn-test-5
+repo: https://github.com/babylonlabs-io/babylon
+genesis: 'https://snapshots.polkachu.com/testnet-genesis/babylon/genesis.json'
+peers: ''
+seeds: '8fa2d1ab10dfd99a51703ba760f0ef555ae88f36@16.162.207.201:26656'
+minimum_gas_price: 0.005ubbn
+
+# [Optional] Snapshot
+snapshot_hour: 0
+snapshot_minute: 0

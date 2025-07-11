@@ -1,0 +1,15 @@
+network: bitsong
+folder: '.bitsongd'
+daemon: bitsongd
+chain_id: bitsong-2b
+repo: https://github.com/bitsongofficial/go-bitsong
+genesis: https://raw.githubusercontent.com/bitsongofficial/networks/master/bitsong-2b/genesis.json
+seed: 'ade4d8bc8cbe014af6ebdf3cb7b1e9ad36f412c0@seeds.polkachu.com:16056'
+minimum_gas_price: '0btsg'
+
+
+
+# [Optional] Snapshot
+snapshot_hour: 1
+snapshot_minute: 45
+wasm: 'inside'

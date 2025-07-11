@@ -1,0 +1,37 @@
+---
+- name: Allow SSH connections
+  ufw:
+    rule: allow
+    port: 22
+    proto: tcp
+
+- name: Deny outgoing to private network ranges
+  ufw:
+    rule: deny
+    direction: out
+    interface: "{{ item.interface }}"
+    from_ip: any
+    to_ip: "{{ item.range }}"
+  loop:
+    - { interface: "{{ ansible_default_ipv4.interface }}", range: '10.0.0.0/8' }
+    - { interface: "{{ ansible_default_ipv4.interface }}", range: '172.16.0.0/12' }
+    - { interface: "{{ ansible_default_ipv4.interface }}", range: '192.168.0.0/16' }
+    - { interface: "{{ ansible_default_ipv4.interface }}", range: '100.64.0.0/10' }
+    - { interface: "{{ ansible_default_ipv4.interface }}", range: '198.18.0.0/15' }
+    - { interface: "{{ ansible_default_ipv4.interface }}", range: '169.254.0.0/16' }
+
+- name: Enable UFW
+  ufw:
+    state: enabled
+    direction: incoming
+    policy: deny
+    default: yes
+
+- name: Check UFW status
+  command: ufw status numbered
+  register: ufw_status
+  changed_when: false
+
+- name: Show UFW status
+  debug:
+    var: ufw_status.stdout_lines

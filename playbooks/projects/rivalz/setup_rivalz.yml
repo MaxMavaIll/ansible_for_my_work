@@ -1,0 +1,33 @@
+---
+- name: Install NVM, Node.js, and npm packages
+  hosts: all
+  become: yes
+  tasks:
+    - name: Install NVM
+      shell: |
+        wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+        export NVM_DIR="$HOME/.nvm"
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+        [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+        nvm install 20.0.0
+      args:
+        executable: /bin/bash
+      environment:
+        HOME: "{{ ansible_env.HOME }}"
+        USER: "{{ ansible_user_id }}"
+
+    - name: Install rivalz-node-cli globally
+      shell: |
+        source $HOME/.nvm/nvm.sh
+        source .bashrc
+        nvm use 20.0.0
+        npm install -g rivalz-node-cli
+      args:
+        executable: /bin/bash
+      environment:
+        HOME: "{{ ansible_env.HOME }}"
+
+    - name: Rivalz run in screen
+      shell: |
+        export PATH=$PATH:$HOME/.nvm/versions/node/v20.0.0/bin/
+        screen -dmS rivalz bash -c "rivalz run"

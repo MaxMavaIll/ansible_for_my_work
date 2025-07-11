@@ -1,0 +1,50 @@
+- name: Install Nillion 
+  hosts: all
+  tasks:
+    # - name: Install Python module 'requests'
+    #   ansible.builtin.package:
+    #     name: python3-requests
+    #     state: present
+
+    # - name: Download image nillion/retailtoken-accuser:v1.0.0
+    #   docker_image:
+    #     name: nillion/retailtoken-accuser
+    #     tag: v1.0.0
+    #     source: pull
+    
+    # - name: Create the directory ~/nillion/accuser
+    #   file: 
+    #     path: "{{ ansible_env.HOME }}/nillion/accuser"
+    #     state: directory
+    #     mode: '0755'
+
+    # - name: Start the Docker container and execute the initialise command
+    #   docker_container:
+    #     name: initialise
+    #     image: nillion/retailtoken-accuser:v1.0.0
+    #     volumes:
+    #       - "{{ ansible_env.HOME }}/nillion/accuser:/var/tmp"
+    #     command: initialise
+    #     detach: false
+    #     tty: false
+    #     state: started
+
+    # - name: View the contents of credentials.json
+    #   command: "sudo cat {{ ansible_env.HOME }}/nillion/accuser/credentials.json"
+    #   register: credentials_output
+
+    # - name: Output credentials.json to the console
+    #   debug:
+    #     # msg: "{{ inventory_hostname }}){{ ansible_default_ipv4.address }}"
+    #     msg: "{{ credentials_output.stdout }}"
+
+    - name: Запустити Docker контейнер і виконати команду initialise
+      docker_container:
+        name: nillion
+        image: nillion/retailtoken-accuser:v1.0.0
+        volumes:
+          - "{{ ansible_env.HOME }}/nillion/accuser:/var/tmp"
+        command: "accuse --rpc-endpoint 'https://nillion-testnet-rpc.w3coins.io' --block-start 5352317"
+        detach: true
+        restart_policy: always
+        state: started

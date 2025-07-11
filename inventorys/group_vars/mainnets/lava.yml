@@ -1,0 +1,15 @@
+# Binary needs to be built with "make build-linux"
+network: lava
+folder: '.lava'
+daemon: lavad
+chain_id: lava-mainnet-1
+repo: https://github.com/lavanet/lava
+genesis: 'https://storage.googleapis.com/lavanet-public-asssets/tge/genesis.json'
+seeds: '91706fd6ec45e38661ba7bb7567fc572b738c3ea@lava-seeds.w3coins.io:11166,2d4db6b95804ea97e1f3655d043e6becf9bffc94@lava-seeds2.w3coins.io:11166'
+peers: ''
+minimum_gas_price: '0.01ulava'
+#custom_port_prefix: 111
+
+# [Optional] Snapshot
+snapshot_hour: 1
+snapshot_minute: 30

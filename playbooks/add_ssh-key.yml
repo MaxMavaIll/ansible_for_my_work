@@ -1,0 +1,12 @@
+---
+#state: present добавити
+#state: absent видалити
+- name: Work with ssh
+  hosts: all
+  tasks:
+    - name: Add multiple SSH keys to authorized_keys
+      authorized_key:
+        user: "{{ user_name }}"
+        state: present 
+        key: "{{ lookup('vars', item) }}"
+      with_items: "{{ ssh_keys.split(',') }}"

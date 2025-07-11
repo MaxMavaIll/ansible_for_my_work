@@ -1,0 +1,76 @@
+---
+- name: Recover consensus and block production for validators
+  hosts: all
+  tasks:
+    
+    # - name: Stop and remove the current bostrom container
+    #   shell: |
+    #     docker stop bostrom
+    #     docker rm bostrom
+    #   ignore_errors: true
+    
+    # - name: Backup priv_validator_state.json
+    #   shell: |
+    #     cp {{ user_dir }}/.cyber/data/priv_validator_state.json {{ user_dir }}/.cyber/priv_validator_state.json_bak
+    #   args:
+    #     creates: '{{ user_dir }}/.cyber/priv_validator_state.json_bak'
+
+    # - name: Print contents of priv_validator_state.json
+    #   shell: |
+    #     cat {{ user_dir }}/.cyber/priv_validator_state.json_bak
+    #   register: priv_validator_contents
+    #   ignore_errors: true
+
+    # - name: Display the contents of priv_validator_state.json_bak
+    #   debug:
+    #     var: priv_validator_contents.stdout
+      
+    
+    # - name: Run rollback container
+    #   shell: |
+    #     docker run -d --gpus all --name=bostrom_rollback --restart no \
+    #     -v {{ user_dir }}/.cyber/:/root/.cyber cyberd/bostrom:v5.1.1-rollback
+    #   register: rollback_output
+
+    # - name: Wait for rollback to complete
+    #   shell: |
+    #     sleep 60
+    #     docker logs bostrom_rollback | grep "Rolled back state to height 15700803"
+    #   retries: 5
+    #   delay: 10
+    #   register: rollback_check
+    #   until: rollback_check.stdout is search("Rolled back state to height 15700803")
+
+    # - name: Remove the rollback container
+    #   shell: docker rm  bostrom_rollback
+
+    # - name: Verify backup priv_validator_state.json matches current file
+    #   shell: |
+    #     diff {{ user_dir }}/.cyber/priv_validator_state.json_bak {{ user_dir }}/.cyber/data/priv_validator_state.json
+    #   register: diff_check
+    #   ignore_errors: true
+
+    # - name: Fail if priv_validator_state.json files do not match
+    #   fail:
+    #     msg: "priv_validator_state.json backup does not match the current file."
+    #   when: diff_check.rc != 0
+    
+    # - name: Update config.toml to set timeout_precommit_delta
+    #   lineinfile:
+    #     path: '{{ user_dir }}/.cyber/config/config.toml'
+    #     regexp: '^timeout_precommit_delta ='
+    #     line: 'timeout_precommit_delta = "1ms"'
+    #     backrefs: yes
+
+    - name: Launch new bostrom container from v5.2.0-cuda11.4 image
+      shell: |
+        docker run -d --gpus all --name=bostrom --restart unless-stopped \
+        -v {{ user_dir }}/.cyber/:/root/.cyber cyberd/bostrom:v5.2.0-cuda11.4
+
+    # - name: Check if the container has the expected hash in logs
+    #   shell: |
+    #     docker logs bostrom -f --tail 100000 2>&1 | grep "Expected F7E932521CBF3E072B0C207E872579A66D5EF63DE3DF6623B66603FCB74C25E8"
+    #   register: hash_check
+    #   retries: 1
+    #   delay: 15
+    #   until: hash_check.stdout is search("Expected F7E932521CBF3E072B0C207E872579A66D5EF63DE3DF6623B66603FCB74C25E8")

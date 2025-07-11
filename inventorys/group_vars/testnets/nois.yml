@@ -1,0 +1,15 @@
+network: nois
+folder: '.noisd'
+daemon: noisd
+chain_id: nois-testnet-005
+node_version: 'v1.0.5'
+repo: https://github.com/noislabs/noisd
+genesis: 'https://raw.githubusercontent.com/noislabs/networks/nois-testnet-005/nois-testnet-005/genesis.json'
+seeds: 'ade4d8bc8cbe014af6ebdf3cb7b1e9ad36f412c0@testnet-seeds.polkachu.com:17356'
+minimum_gas_price: '0.05unois'
+custom_port_prefix: 173
+
+# [Optional] Snapshot
+snapshot_hour: 5
+snapshot_minute: 0
+wasm: 'outside'

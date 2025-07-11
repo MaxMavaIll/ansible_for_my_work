@@ -1,0 +1,12 @@
+network: initiation
+folder: '.initia'
+daemon: initiad
+chain_id: initiation-1
+node_version: v0.2.23-stage-2
+repo: https://github.com/initia-labs/initia
+genesis: 'https://snapshots.polkachu.com/testnet-genesis/initia/genesis.json'
+seeds: 'ade4d8bc8cbe014af6ebdf3cb7b1e9ad36f412c0@testnet-seeds.polkachu.com:25756'
+upgrade_folder: v0.2.23-stage-2
+
+update_website_immediately: false
+gas_params: '--fees 2000000000000aevmos'

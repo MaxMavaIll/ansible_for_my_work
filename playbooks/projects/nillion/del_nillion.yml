@@ -1,0 +1,18 @@
+- name: Delete Nillion 
+  hosts: all
+  tasks:
+    - name: Stop the Nillion Docker container
+      docker_container:
+        name: nillion
+        state: stopped
+
+    - name: Remove the Nillion Docker container
+      docker_container:
+        name: nillion
+        state: absent
+        
+    - name: Remove the accuser file
+      file:
+        path: ~/nillion/accuser
+        state: absent
+

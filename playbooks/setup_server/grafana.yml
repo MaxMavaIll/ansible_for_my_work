@@ -1,0 +1,23 @@
+---
+- name: Setup Grafana Node Exporter
+  hosts: your_target_host
+  become: yes
+  tasks:
+    - name: Ensure ~/grafana directory exists
+      file:
+        path: "{{ ansible_env.HOME }}/grafana"
+        state: directory
+        mode: '0755'
+
+    - name: Copy grafana_prometheus_node.yml from remote server to ~/grafana
+      fetch:
+        src: playbooks/files/grafana_prometheus_node.yml
+        dest: "{{ ansible_env.HOME }}/grafana/"
+        flat: yes
+
+    - name: Run docker compose up -d node-exporter
+      shell: |
+        cd ~/grafana
+        docker compose -f grafana_prometheus_node.yml up -d node-exporter
+      args:
+        chdir: "{{ ansible_env.HOME }}/grafana"
