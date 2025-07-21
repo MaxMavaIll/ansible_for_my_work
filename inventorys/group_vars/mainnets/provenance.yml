@@ -1,0 +1,14 @@
+network: provenance
+folder: '.provenanced'
+daemon: provenanced
+chain_id: 'pio-mainnet-1'
+node_version: 'v1.16.0'
+repo: 'https://github.com/provenance-io/provenance'
+genesis: 'https://raw.githubusercontent.com/provenance-io/mainnet/main/pio-mainnet-1/genesis.json'
+seeds: '258f523c96efde50d5fe0a9faeea8a3e83be22ca@seed.pio-mainnet-1.provenance.aviaone.com:10277'
+minimum_gas_price: '1905nhash'
+custom_port_prefix: 244
+
+# [Optional] Snapshot
+snapshot_hour: 0
+snapshot_minute: 15

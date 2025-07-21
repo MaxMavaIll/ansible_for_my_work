@@ -1,0 +1,32 @@
+---
+- name: ReInstall rivalz
+  hosts: all
+  become: yes
+  task:
+    - name: Update system packages
+        apt:
+          upgrade: dist
+          update_cache: yes
+
+    - name: Turn off the program screen 
+      shell: |
+      screen -S rivalz -X quit
+
+    - name: Delete rivalz
+      shell: |
+        source $HOME/.nvm/nvm.sh
+        source .bashrc
+        nvm use 20.0.0
+        npm remove -g rivalz-node-cli
+
+    - name: Install rivalz
+      shell: |
+        source $HOME/.nvm/nvm.sh
+        source .bashrc
+        nvm use 20.0.0
+        npm install -g rivalz-node-cli
+        
+    - name: Rivalz run in screen
+      shell: |
+        export PATH=$PATH:$HOME/.nvm/versions/node/v20.0.0/bin/
+        screen -dmS rivalz bash -c "rivalz run" 

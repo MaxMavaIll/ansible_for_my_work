@@ -1,0 +1,27 @@
+---
+- name: Setup and deploy infernet-container-starter part 2
+  hosts: all
+  tasks:
+    - name: Update CallContract.s.sol with new settings
+      shell: |
+        sed -i "s|0x13D69Cf7d6CE4218F646B759Dcf334D82c023d8e|{{ deploy_addr }}|" {{ user_dir }}/infernet-container-starter/projects/hello-world/contracts/script/CallContract.s.sol
+
+    - name: Update Docker-compose.yml with new settings 0.0.0.0 -> 127.0.0.1
+      shell: |
+        sed -i -e "s|6379:6379|127.0.0.1:6379:6379|" {{ user_dir }}/infernet-container-starter/deploy/docker-compose.yaml
+
+    - name: Update Docker-compose.yml with new settings 1.0.0 -> 1.2.0 version
+      shell: |
+        sed -i -e "s|ritualnetwork/infernet-node:1.0.0|ritualnetwork/infernet-node:1.2.0|" {{ user_dir }}/infernet-container-starter/deploy/docker-compose.yaml
+
+    - name: hello-world make call-contract
+      shell: 
+        cmd: project=hello-world make call-contract
+        chdir: '{{ user_dir }}/infernet-container-starter'
+      environment:
+        PATH: '{{ path }}:{{ user_dir }}/.foundry/bin'
+
+    - name: Run docker-compose up manually
+      shell:
+        cmd: docker-compose down -v && docker-compose up -d --build 
+        chdir: '{{ user_dir }}/infernet-container-starter/deploy'

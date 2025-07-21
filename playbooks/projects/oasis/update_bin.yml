@@ -1,0 +1,17 @@
+---
+- name: Update binaries and run script
+  hosts: all
+  become: yes
+  tasks:
+    - name: Update version in script
+      shell: sed -i 's|VER=${1:-".*"}|VER=${1:-"{{ last_version }}"}|' {{ user_dir }}/update_bin.sh
+      become: yes
+      become_user: "{{ user_name }}"  
+       # shell: sudo -u {{ user_name }} bash sed -i 's/VER=${1:-".*"}/VER=${1:-"{{ last_version }}"}' {{ user_dir }}/update_bin.sh
+        
+
+    - name: Run script
+      shell: bash {{ user_dir }}/update_bin.sh
+      become: yes
+      become_user: "{{ user_name }}"  
+       # shell: sudo -u {{ user_name }} bash

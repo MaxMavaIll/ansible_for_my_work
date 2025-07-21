@@ -1,0 +1,55 @@
+---
+
+- hosts: firewall
+  gather_facts: yes
+  vars:
+    allowed_subnets:
+        - 127.0.0.1/32 #local
+        - 95.217.20.195/32 #grafana
+        - 207.180.251.18/32 #vpn Conatabo
+        - 206.81.31.16/32 #vpn DO
+    deny_subnets:
+        - 10.0.0.0/8
+        - 172.16.0.0/12
+        - 192.168.0.0/16
+        - 100.64.0.0/10
+        - 198.18.0.0/15
+        - 169.254.0.0/16
+  tasks:
+    # - name: Allow everything and disable UFW
+      # ufw:
+        # state: reset
+    # - name: Deny incoming
+      # ufw:
+        # default: deny
+        # direction: incoming
+    # - name: Allow outgoing
+      # ufw:
+        # default: allow
+        # direction: outgoing
+    # - name: Allow port range 8000-8800 tcp
+      # ufw:
+        # rule: allow
+        # port: 8000:8800
+        # direction: in
+        # proto: tcp
+    # - name: Allow port range 8000-8800 udp
+      # ufw:
+        # rule: allow
+        # port: 8000:8800
+        # direction: in
+        # proto: udp
+    - name: Allow all access from networks to this host
+      ufw:
+        rule: allow
+        src: '{{ item }}'
+      loop: '{{ allowed_subnets }}'
+    - name: Deny all access from networks to this host
+      ufw:
+        rule: deny
+        direction: out
+        src: '{{ item }}'
+      loop: '{{ deny_subnets }}'
+    - name: Enable UFW
+      ufw:
+        state: enabled

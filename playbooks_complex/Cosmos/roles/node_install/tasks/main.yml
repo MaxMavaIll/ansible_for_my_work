@@ -1,0 +1,74 @@
+---
+- name: Install from source
+  become: false
+  block:
+    - name: Clone node repo
+      git:
+        repo: '{{ repo }}'
+        dest: '{{ user_dir }}/{{ network }}'
+        version: '{{ node_version }}'
+        update: yes
+        force: yes
+        recursive: no
+
+    - name: Install node {{ node_version }}
+      command: '{{ item }}'
+      args:
+#        chdir: '{{ user_dir }}/{{ network }}/chain'
+         chdir: '{{ user_dir }}/{{ network }}'
+      with_items:
+        - '{{ make }}'
+      environment:
+        PATH: '{{ path }}'
+        GOPATH: '{{ user_dir }}/go'
+      when: binary is undefined
+
+    - name: Check if binary exists in build/
+      stat:
+        path: '{{ user_dir }}/{{ network }}/build/{{ daemon }}'
+      register: build_stat
+
+    - name: Check if binary exists in bin/
+      stat: 
+        path: '{{ user_dir }}/{{ network }}/bin/{{ daemon }}'
+      register: bin_stat
+
+    - name: Copy binary build/ to go/bin
+      when: make is defined and (make == "make build" or make == "make build-all") and build_stat.stat.exists
+      copy:
+        remote_src: true
+        src: '{{ user_dir }}/{{ network }}/build/{{ daemon }}'
+        dest: '{{ user_dir }}/go/bin/{{ daemon }}'
+        mode: '0755'
+
+    - name: Copy binary bin/ to go/bin
+      when: make is defined and (make == "make build" or make == "make build-all") and bin_stat.stat.exists
+      copy:
+        remote_src: true
+        src: '{{ user_dir }}/{{ network }}/bin/{{ daemon }}'
+        dest: '{{ user_dir }}/go/bin/{{ daemon }}'
+        mode: '0755'
+
+  
+- name: set binary install exit condition
+  set_fact:
+    binary_installed: false
+
+- name: download pre-installed binary
+  when: binary is defined
+  block:
+    - name: Install from binary zipped
+      include_tasks: binary_zip.yml
+      when: binary_processing == "zip"
+
+    - name: Install from binary tar gz
+      include_tasks: binary_targz.yml
+      when: binary_processing == "targz"
+
+    - name: Install from binary .deb
+      include_tasks: binary_deb.yml
+      when: binary_processing == "deb"
+
+    - name: Install from binary
+      include_tasks: binary_default.yml
+      when: binary_processing == "default"

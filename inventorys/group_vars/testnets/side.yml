@@ -1,0 +1,12 @@
+network: side
+folder: '.side'
+daemon: sided
+chain_id: grimoria-testnet-1
+node_version: v0.9.0
+repo: https://github.com/sideprotocol/side.git
+genesis: 'https://raw.githubusercontent.com/111STAVR111/props/main/Side/genesis.json'
+seeds: ''
+upgrade_folder: v0.9.0
+update_website_immediately: false
+gas_params: '0.005uside'
+

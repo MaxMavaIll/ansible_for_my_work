@@ -1,0 +1,27 @@
+---
+
+- name: Update and upgrade the machine
+  apt:
+    upgrade: dist
+    update_cache: true
+
+- name: Software 
+  import_tasks: install_software.yml
+
+- name: Add SSH-KEY
+  import_tasks: add_ssh-key.yml
+
+- name: UFW
+  import_tasks: ufw_settings.yml
+
+- name: SSH
+  import_tasks: ssh_settings.yml
+
+
+- name: Settings sudo without password for user
+  lineinfile:
+    dest: /etc/sudoers
+    state: present
+    regexp: '^{{ ansible_user }} ALL=\(ALL\) NOPASSWD: ALL'
+    line: '{{ ansible_user }} ALL=(ALL) NOPASSWD: ALL'
+    validate: 'visudo -cf %s'

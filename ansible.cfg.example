@@ -1,0 +1,4 @@
+[defaults]
+inventory = <path_to_project>/inventorys/test.ini.example
+host_key_checking = False
+ask_become_pass = False

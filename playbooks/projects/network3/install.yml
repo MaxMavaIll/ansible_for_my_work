@@ -1,0 +1,38 @@
+- name: network3
+  hosts: all
+  become: yes
+  tasks:
+    - name: Install net-tools
+      apt:
+        name: net-tools
+        state: latest
+
+    - name: allow port 8080
+      shell: ufw allow 8080
+
+    - name: Edit nesa port
+      lineinfile:
+        path: '{{ nesa_dir }}/.nesa/docker/compose.ipfs.yml'
+        regexp: '      - "8080:8080"'
+        line: '      - "8081:8080"'
+
+
+    - name: Download network3 and restart nesa
+      shell: |
+        docker compose -f {{ nesa_dir }}/.nesa/docker/compose.community.yml up -d --force-recreate ipfs
+        wget https://network3.io/ubuntu-node-v2.1.0.tar
+        tar -xf ubuntu-node-v2.1.0.tar
+        rm -rf ubuntu-node-v2.1.0.tar
+
+    - name: Start network3 
+      shell: cd {{ user_dir }}/ubuntu-node && sudo bash manager.sh up
+      async: 10
+      poll: 0
+
+    - name: Show api key
+      shell: cd {{ user_dir }}/ubuntu-node && sleep 5 && bash manager.sh key
+      register: key
+
+    - name: Orchestrator uptime
+      debug:
+        msg: "{{ key.stdout }}"

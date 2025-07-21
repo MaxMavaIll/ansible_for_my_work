@@ -1,0 +1,22 @@
+network: selfchain
+folder: '.selfchain'
+daemon: selfchaind
+chain_id: 'self-1'
+node_version: v1.0.0
+repo: 'https://github.com/lavanet/lava'
+# binary: 'https://1501792788-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FcIZFCZY4EPKDYaPcDZLG%2Fuploads%2FOlvUYiHbP9ljhSEkXUpK%2Fselfchaind-linux-amd64?alt=media&token=8c3b22b7-dfaf-4310-95e9-e54113f18b18'
+# binary_processing: 'default'
+genesis: 'https://gist.githubusercontent.com/pratikbin/ede03a8f29ae8d55eb10294a109de810/raw/5c4118c327c2070fbafd8de80795b67ec0d98630/genesis-selfchain-mainnet.json'
+peers: 'b307b56b94bd3a02fcad5b6904464a391e13cf48@128.199.33.181:26656,71b8d630e7c3e31f2743fda68e6d3ac64f41cece@209.97.174.97:26656,6ae10267d8581414b37553655be22297b2f92087@174.138.25.159:26656'
+minimum_gas_price: '0uself'
+#custom_port_prefix: 243
+
+# sync_node: snapshot
+# snapshot_url: 'https://snapshots.polkachu.com/snapshots/selfchain/selfchain_1154413.tar.lz4'
+# snapshot_name: 'selfchain_1154413.tar.lz4'
+# addrbook_url: https://snapshots.polkachu.com/addrbook/selfchain/addrbook.json
+
+# [Optional] Snapshot
+snapshot_hour: 0
+snapshot_minute: 30
+

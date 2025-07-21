@@ -1,0 +1,72 @@
+---
+- name: Install Software
+  apt:
+    name: 
+      - ufw
+      - ncdu
+      - git
+      - curl
+      - unzip
+      - jq
+      - gcc
+      - libssl-dev
+      - libc6-dev
+      - pkg-config
+      - make
+      - screen
+      - net-tools
+    state: present
+    update_cache: yes
+
+- name: Download and run the Rust installation script
+  ansible.builtin.shell: |
+    curl https://sh.rustup.rs -sSf | sh -s -- -y
+  args:
+    creates: ~/.cargo/bin/rustc  # Це запобігає повторному виконанню, якщо Rust вже встановлено
+
+- name: Install prerequisites
+  apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - software-properties-common
+    state: present
+    update_cache: yes
+
+- name: Add Docker's official GPG key
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- name: Add Docker repository
+  apt_repository:
+    repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable
+    state: present
+
+- name: Update APT package index
+  apt:
+    update_cache: yes
+
+- name: Install Docker
+  apt:
+    name: docker-ce
+    state: present
+
+- name: Add roles nesa to docker
+  shell: 'usermod -aG docker {{ ansible_user }}'
+
+- name: Ensure Docker service is enabled and running
+  systemd:
+    name: docker
+    enabled: yes
+    state: started
+
+- name: Install Docker Compose
+  get_url:
+    url: https://github.com/docker/compose/releases/download/v2.21.0/docker-compose-{{ ansible_system }}-{{ ansible_architecture }}
+    dest: /usr/local/bin/docker-compose
+    mode: '0755'
+
+- name: Verify Docker Compose installation
+  command: docker-compose --version

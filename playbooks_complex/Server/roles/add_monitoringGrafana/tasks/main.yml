@@ -1,0 +1,26 @@
+---
+- name: Setup Monitoring
+  hosts: all
+  vars: 
+    grafana_dir: "{{ ansible_env.HOME }}/monitoring_server"
+  tasks:
+    - name: Ensure ~/grafana directory exists
+      file:
+        path: "{{ grafana_dir }}"
+        state: directory
+        mode: '0755'
+
+    - name: Copy grafana_prometheus_node.yml from remote server to ~/grafana
+      copy:
+        src: grafana_prometheus_node.yml
+        dest: "{{ grafana_dir }}/docker-compose.yml"
+
+    - name: Full setup Grafana, Prometheus, Exporter
+      import_tasks: full_monitoring.yml
+      when: mon_full | bool
+
+    - name: Setup only Exporter 
+      shell: docker compose up -d node_exporter
+      args:
+        chdir: "{{ grafana_dir }}"
+      when: not mon_full | bool

@@ -1,0 +1,24 @@
+{% if loan_balancing is defined and loan_balancing|bool is sameas true %}
+upstream {{ network }}-grpc {
+    server 127.0.0.1:{{custom_port_prefix}}90 max_fails=3 fail_timeout=30s;
+    server 127.0.0.1:{{custom_port_prefix}}90 backup;
+}
+{% endif %}
+server {
+    listen {{custom_port_prefix}}90;
+{% if type == 'test' or type == 'testrelay' %}
+    server_name {{network}}-testnet-grpc.w3coins.io;
+{% else %}
+    server_name {{network}}-grpc.w3coins.io;
+{% endif %}
+    location / {
+{% if rate_limit is undefined or rate_limit|bool is sameas true %}
+        #limit_req zone=limitreqsbyaddr burst=150 nodelay;
+{% endif %}
+{% if loan_balancing is defined and loan_balancing|bool is sameas true %}
+        proxy_pass     grpc://{{ network }}-grpc;
+{% else %}
+        proxy_pass grpc://127.0.0.1:{{custom_port_prefix}}90;
+{% endif %}
+    }
+}

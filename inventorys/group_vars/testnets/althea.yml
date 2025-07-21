@@ -1,0 +1,15 @@
+network: althea
+folder: '.althea'
+daemon: althea
+chain_id: althea_7357-1
+node_version: ' v0.3.2'
+repo: https://github.com/althea-net/althea-chain
+genesis: 'https://snapshots.polkachu.com/testnet-genesis/althea/genesis.json'
+binary: 'https://github.com/althea-net/althea-chain/releases/download/v0.3.2/althea-v0.3.2-linux-amd64'
+binary_processing: default
+seeds: 'ade4d8bc8cbe014af6ebdf3cb7b1e9ad36f412c0@testnet-seeds.polkachu.com:12456'
+custom_port_prefix: 124
+
+# [Optional] Snapshot
+snapshot_hour: 1
+snapshot_minute: 0

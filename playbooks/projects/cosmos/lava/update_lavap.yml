@@ -1,0 +1,108 @@
+---
+- name: Update Lava Providers
+  hosts: all
+  become: yes
+
+  tasks:
+    # - name: Install Go 1.21.0
+    #   ansible.builtin.shell: |
+    #     bash -c "$(curl -fsSL https://raw.githubusercontent.com/ToTheMars2/Update_programs/main/update_go.sh)" -- "1.19.3"
+    #     source ~/.bashrc
+    #   args:
+    #     executable: /bin/bash
+    #   become: yes
+
+    # - name: Check Go version
+    #   ansible.builtin.shell: |
+    #     /usr/local/go/bin/go version
+    #   args:
+    #     executable: /bin/bash
+    #   register: go_version_output
+
+    # - name: Display Go version
+    #   ansible.builtin.debug:
+    #     msg: "Go version: {{ go_version_output.stdout }}"
+        
+    - name: Stop all Lava services
+      service:
+        name: "{{ item }}"
+        enabled: false
+        state: stopped
+      with_items:
+        - cosmos-t_lava-provider
+        - blast-sp_lava-provider
+        - blast_lava-provider
+        - osmosis_lava-provider
+        - cosmos_lava-provider
+        - eth-sp_lava-provider
+        - eth_lava-provider
+        - near_lava-provider
+        - axelar-t_lava-provider
+        - axelar_lava-provider
+        - evmos-t_lava-provider
+        - evmos_lava-provider
+        - near-t_lava-provider
+        - lava-provider
+        - axelar-mainnet-provider
+        - axelar-testnet-provider
+        - evmos-mainnet-provider
+        - evmos-testnet-provider
+        - near-mainnet-provider
+        - near-testnet-provider
+      ignore_errors: yes
+
+
+    # - name: Change to Lava directory
+    #   command: chdir={{user_dir}}/lava pwd
+
+    # - name: Pull latest changes from git
+    #   git:
+    #     repo: 'https://github.com/lavanet/lava.git'
+    #     dest: '{{user_dir}}/lava'
+    #     version: '{{ version }}'
+
+    # - name: Build Lava {{ version }}
+    #   command: make build-all
+    #   args:
+    #     chdir: '{{user_dir}}/lava'
+    #   environment:
+    #     PATH: '{{ path }}'
+    #     GOPATH: '{{ user_dir }}/go'
+
+    # - name: Copy lavap to go bin
+    #   copy:
+    #     src: '{{user_dir}}/lava/build/lavap'
+    #     dest: '{{user_dir}}/go/bin/'
+    #     remote_src: true
+    #     mode: '0755'
+
+    # - name: Restart Lava services
+    #   systemd:
+    #     name: "{{ item }}"
+    #     enabled: true
+    #     state: restarted
+    #   with_items:
+    #     - lava-provider
+    #     - near-t_lava-provider
+    #     - near_lava-provider
+    #     - axelar-t_lava-provider
+    #     - axelar_lava-provider
+    #     - evmos_lava-provider
+    #     - evmos-t_lava-provider
+    #     - blast-sp_lava-provider
+    #     - blast_lava-provider
+    #     - osmosis_lava-provider
+    #     - cosmos_lava-provider
+    #     - eth-sp_lava-provider
+    #     - eth_lava-provider
+    #     - cosmos-t_lava-provider
+    #     - axelar-mainnet-provider
+    #     - axelar-testnet-provider
+    #     - evmos-mainnet-provider
+    #     - evmos-testnet-provider
+    #     - near-mainnet-provider
+    #     - near-testnet-provider
+    #     - lava-mainnet-provider
+    #     - cosmos-hub-provider
+    #     - cosmos-hub-testnet-provider
+    #   ignore_errors: yes

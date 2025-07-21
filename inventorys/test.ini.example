@@ -1,0 +1,159 @@
+[all:vars]
+# === 1. Дані про групу і конфігурацію ===
+my_group = "{{ group_names | select('match', '.*[MT]$') | list | first }}"
+name_conf = "{{ my_group[:-1] }}"
+var_file = "../inventorys/group_vars/{{ main_or_test }}s/{{ group_to_file[group_names[0]] }}.yml"
+
+# === 2. Шляхи та налаштування середовища ===
+user_dir = '/root'
+user_name = root                # Потрібний для додавання нового користувача
+path = '/sbin:/usr/sbin:/bin:/usr/bin:/usr/local/bin:/usr/local/go/bin:{{ user_dir }}/go/bin'
+
+# === 3. Дані для Ansible ===
+ansible_ssh_private_key_file = '~/.ssh/id_rsa'
+ansible_user = root
+ansible_become_pass = "***********"   # Пароль при конекті до сервера
+ansible_sudo_pass = "***********"
+
+# === 4. Моніторинг та збір даних ===
+monitoring_disk = '"/"'                # Для моніторингу сервера
+mon_full = false
+
+# === 5. Налаштування Node/Go ===
+make = 'make install'
+node_name = 'Example_Node'
+go_version = '1.23.1'
+
+# === 6. Дані для домену та Cloudflare ===
+domen = 'examle.com'
+cloudflare_api_key = "K51*****log"
+
+# === 7. SSH ключі ===
+ssh_key_1 = 'ssh-rsa AAAAB3*****'
+ssh_key_2 = 'ssh-rsa AAAAB3*****'
+ssh_keys = ssh_key_1, ssh_key_2
+
+
+
+
+
+[linux:children]
+ubuntu
+cosmos_main
+cosmos_test
+other
+
+
+
+
+
+#########################################
+#                Cosmos                 #
+######################################### 
+
+[cosmos_main:vars]
+main_or_test = 'mainnet'
+[cosmos_main:children]
+bitsongM
+
+##############################
+#          MAINNET           #
+############################## 
+[bitsongM:vars]
+ansible_user = bitsong
+user_dir = '/home/bitsong'
+user_name = 'bitsong'
+prepare = false # Завантаження pkg, go, cosmosvisor
+go_version = '1.22.0'
+
+node_version = 'v0.23.0'
+upgrade_folder = 'v023'
+; snapshot_url = "https://snapshots.polkachu.com/snapshots/bitsong/bitsong_22560629.tar.lz4"
+; addrbook_url = "https://snapshots.polkachu.com/addrbook/bitsong/addrbook.json"
+[bitsongM]
+# custom_port_prefix => port ***57
+# indexer => null вимкнутий, kv ключений
+bitsongM_rpc ansible_host=192.168.0.1 custom_port_prefix='602' indexer='null'
+
+
+
+
+
+
+
+
+
+
+#########################################
+#                Cosmos                 #
+######################################### 
+
+[cosmos_test:vars]
+main_or_test = 'testnet'
+[cosmos_test:children]
+bitsongT
+
+##############################
+#          TESTNET           #
+############################## 
+
+[bitsongT:vars]
+ansible_user = bitsong
+user_dir = '/home/bitsong'
+user_name = 'bitsong'
+prepare = false # Завантаження pkg, go, cosmosvisor
+go_version = '1.22.0'
+
+node_version = 'v0.23.0'
+upgrade_folder = 'v023'
+; snapshot_url = "https://snapshots.polkachu.com/snapshots/bitsong/bitsong_22560629.tar.lz4"
+; addrbook_url = "https://snapshots.polkachu.com/addrbook/bitsong/addrbook.json"
+[bitsongT]
+# custom_port_prefix => port ***57
+# indexer => null вимкнутий, kv ключений
+bitsongT_rpc ansible_host=192.168.0.1 custom_port_prefix='602' indexer='null'
+
+
+
+
+
+
+
+
+
+
+#########################################
+#                OTHER                  #
+######################################### 
+
+[other:vars]
+main_or_test = 'other'
+[other:children]
+nexus
+
+##############################
+#          NETWORK           #
+############################## 
+
+[nexus]
+nexus_1 ansible_host=192.168.1.0 ansible_port=2032 
+nexus_2 ansible_host=192.168.1.1 ansible_port=2022 ansible_python_interpreter='/usr/bin/python3.8'
+nexus_3 ansible_host=192.168.1.2
+
+
+
+
+
+
+
+
+
+
+#########################################
+#                SERVER                 #
+######################################### 
+
+[ubuntu]
+server_1 ansible_host=192.168.1.0 
+server_2 ansible_host=192.168.1.1
+server_3 ansible_host=192.168.1.2

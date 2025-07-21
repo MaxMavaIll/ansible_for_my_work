@@ -1,0 +1,133 @@
+---
+- name: Вивести рядок
+  ansible.builtin.debug:
+    msg: "{{ name_conf }}"
+
+- name: Add safe.directory in git config for cosmos
+  command: git config --global --add safe.directory {{ user_dir }}/{{ network }}
+  become_user: ubuntu  
+
+
+- name: Видалити файл на віддаленому сервері
+  file:
+    path: "{{ user_dir }}/{{ network }}"  
+    state: absent
+  become: yes
+
+
+- name: Clone node repo {{ repo }}
+  git:
+    repo: '{{ repo }}'
+    dest: '{{ user_dir }}/{{ network }}'
+    version: '{{ node_version }}'
+    update: yes
+    force: yes
+    recursive: no
+
+- name: Skip replace tendermint
+  command: '{{ item }}'
+  with_items:
+    - 'go mod edit -replace github.com/tendermint/tendermint=github.com/skip-mev/mev-tendermint@{{ skip_version }}'
+    - 'go mod tidy'
+  args:
+    chdir: '{{ user_dir }}/{{ network }}'
+  environment:
+    PATH: '{{ path }}'
+    GOPATH: '{{ user_dir }}/go'
+  when: skip_version is defined and (type == "main" or type == "test")
+
+- name: Install node {{ node_version}}
+  command: '{{ item }}'
+  args:
+    chdir: '{{ user_dir }}/{{ network }}'
+  with_items:
+    - '{{ make }}'
+  environment:
+    PATH: '{{ path }}'
+    GOPATH: '{{ user_dir }}/go'
+  when: binary is undefined
+
+# - name: Check if binary exists in build/
+#   stat:
+#     path: '{{ user_dir }}/{{ network }}/build/{{ daemon }}'
+#   register: build_stat
+#   when: binary is undefined
+
+# - name: Check if binary exists in bin/
+#   stat: 
+#     path: '{{ user_dir }}/{{ network }}/bin/{{ daemon }}'
+#   register: bin_stat
+#   when: binary is undefined
+
+# - name: Copy binary build/ to go/bin
+#   when: make is defined and (make == "make build" or make == "make build-all") and build_stat.stat.exists
+#   copy:
+#     remote_src: true
+#     src: '{{ user_dir }}/{{ network }}/build/{{ daemon }}'
+#     dest: '{{ user_dir }}/go/bin/{{ daemon }}'
+#     mode: '0755'
+#   when: binary is undefined
+
+# - name: Copy binary bin/ to go/bin
+#   when: make is defined and (make == "make build" or make == "make build-all") and bin_stat.stat.exists
+#   copy:
+#     remote_src: true
+#     src: '{{ user_dir }}/{{ network }}/bin/{{ daemon }}'
+#     dest: '{{ user_dir }}/go/bin/{{ daemon }}'
+#     mode: '0755'
+#   when: binary is undefined
+
+- name: download pre-installed binary
+  when: binary is defined
+  block:
+    - name: Install from binary zipped
+      include_tasks: binary_zip.yml
+      when: binary_processing == "zip"
+
+    - name: Install from binary tar gz
+      include_tasks: binary_targz.yml
+      when: binary_processing == "targz"
+
+    - name: Install from binary .deb
+      include_tasks: binary_deb.yml
+      when: binary_processing == "deb"
+
+    - name: Install from binary
+      include_tasks: binary_default.yml
+      when: binary_processing == "default"
+
+
+
+- name: Create new directory
+  file:
+    path: '{{ item }}'
+    state: directory
+    mode: '0755'
+  with_items:
+    - '{{ user_dir }}/{{ folder }}/cosmovisor/upgrades/{{ upgrade_folder }}/bin'
+  when: upgrade_folder is defined
+
+- name: copy binary file to cosmovisor upgrade folder
+  copy:
+    src: '{{ user_dir }}/go/bin/{{ daemon }}'
+    dest: '{{ user_dir }}/{{ folder }}/cosmovisor/upgrades/{{ upgrade_folder }}/bin'
+    remote_src: true
+    mode: '0755'
+  when: upgrade_folder is defined
+
+- name: copy binary file to cosmovisor genesis folder
+  copy:
+    src: '{{ user_dir }}/go/bin/{{ daemon }}'
+    dest: '{{ user_dir }}/{{ folder }}/cosmovisor/genesis/bin'
+    remote_src: true
+    mode: '0755'
+  when: upgrade_folder is not defined
+
+- name: restart cosmovisor service
+  become: true
+  systemd:
+    name: '{{ network }}-{{ main_or_test }}'
+    state: restarted
+    daemon_reload: yes
+    enabled: yes
+

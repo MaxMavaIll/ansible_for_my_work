@@ -1,0 +1,32 @@
+- name: Delete hemi
+  hosts: all
+  become: yes
+  tasks:
+    # - name: Stop hemi service
+    #   systemd:
+    #     name: hemi.service
+    #     state: stopped
+    #     enabled: no
+
+    - name: Remove hemi service file
+      file:
+        path: /etc/systemd/system/hemi.service
+        state: absent
+
+    - name: Reload systemd to apply changes
+      systemd:
+        daemon_reload: yes
+    - name: Ensure directory with correct permissions
+      file:
+        path: /root/heminetwork_{{ version }}_linux_amd64
+        state: directory  
+        mode: '0755'
+
+    - name: Force remove HemiNetwork binary directory
+      command: rm -rf /root/heminetwork_{{ version }}_linux_amd64
+
+
+    - name: Remove any remaining HemiNetwork tar file
+      file:
+        path: /tmp/heminetwork_{{ version }}_linux_amd64.tar.gz
+        state: absent

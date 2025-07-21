@@ -1,0 +1,26 @@
+---
+- hosts: all
+  become: yes
+  tasks:
+    - name: Перевірка або створення користувача
+      ansible.builtin.user:
+        name: '{{ user_name }}'        # Замініть 'myuser' на потрібного вам користувача
+        state: present
+        shell: /bin/bash     # Налаштуйте потрібну оболонку
+
+    - name: Додати користувача до групи sudo
+      ansible.builtin.user:
+        name: '{{ user_name }}'
+        groups: sudo
+        append: yes
+
+    - name: Налаштування sudo без пароля для користувача
+      ansible.builtin.lineinfile:
+        dest: /etc/sudoers
+        state: present
+        regexp: '^{{ user_name }} ALL=\(ALL\) NOPASSWD: ALL'
+        line: '{{ user_name }} ALL=(ALL) NOPASSWD: ALL'
+        validate: 'visudo -cf %s'  # Перевірка на правильність sudoers файлу
+
+    - name: Add roles nesa to docker
+      shell: 'usermod -aG docker {{ user_name }}'

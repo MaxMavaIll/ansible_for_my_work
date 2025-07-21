@@ -1,0 +1,8 @@
+---
+- name: Preparing the Server for Work
+  hosts: all
+  become: true
+  gather_facts: true
+  roles:
+    - settings_server
+    - add_monitoringGrafana

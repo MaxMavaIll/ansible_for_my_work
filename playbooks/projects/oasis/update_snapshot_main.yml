@@ -1,0 +1,52 @@
+- name: Prepare and transfer consensus data
+  hosts: all
+  become: yes
+  tasks:
+    - name: Stop oasis-testnet-emerald {{ user_dir }}
+      ansible.builtin.command:
+        cmd: systemctl stop oasis-mainnet-emerald
+      when: inventory_hostname == "oasis_emerald"
+
+    - name: Copy consensus data to SNAP folder
+      ansible.builtin.command:
+        cmd: cp -r {{ user_dir }}/node/data/consensus {{ user_dir }}/SNAP
+
+    - name: Stop oasis-testnet-emerald
+      ansible.builtin.command:
+        cmd: systemctl start oasis-mainnet-emerald
+      when: inventory_hostname == "oasis_emerald"
+
+    - name: Remove oasis_priv_validator.json
+      ansible.builtin.file:
+        path: "{{ user_dir }}/SNAP/consensus/oasis_priv_validator.json"
+        state: absent
+
+    # - name: Копіювання файлу з source_server на destination_server
+    #   copy:
+    #     src: '/home/emerald/SNAP/consensus'
+    #     dest: "{{ user_dir }}/consensus"
+    #     remote_src: yes
+    #     directory_mode: yes
+    #   delegate_to: oasis_emerald
+
+    # - name: Copy consensus folder to oasis_tsapphire {{ hostvars['oasis_cipher']['user_name'] }}@{{ hostvars['oasis_cipher']['ansible_host'] }}:{{ hostvars['oasis_cipher']['user_dir'] }}
+    #   ansible.builtin.command: >
+    #     rsync -avz {{ user_dir }}/SNAP/consensus/
+    #     {{ hostvars['oasis_cipher']['user_name'] }}@{{ hostvars['oasis_cipher']['ansible_host'] }}:{{ hostvars['oasis_cipher']['user_dir'] }}
+
+# - name: Deploy consensus data on oasis_tsapphire
+#   hosts: oasis_tsapphire
+#   become: yes
+#   tasks:
+#     - name: Stop sapphire service
+#       ansible.builtin.command:
+#         cmd: systemctl stop sapphire
+
+#     - name: Remove old consensus directory
+#       ansible.builtin.file:
+#         path: /home/sapphire/node/data/consensus
+#         state: absent
+
+#     - name: Start sapphire service
+#       ansible.builtin.command:
+#         cmd: systemctl start sapphire

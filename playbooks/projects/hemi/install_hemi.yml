@@ -1,0 +1,57 @@
+- name: Install hemi
+  hosts: all
+  become: yes
+  tasks:
+    # - name: Update and upgrade apt packages
+    #   apt:
+    #     update_cache: yes
+    #     upgrade: 'yes'
+    
+    
+    - name: Download HemiNetwork binary
+      get_url:
+        url: "https://github.com/hemilabs/heminetwork/releases/download/{{ version }}/heminetwork_{{ version }}_linux_amd64.tar.gz"
+        dest: "{{ user_dir }}/heminetwork_{{ version }}_linux_amd64.tar.gz"
+        mode: '0644'
+
+    - name: Extract HemiNetwork binary
+      unarchive:
+        src: "{{ user_dir }}/heminetwork_{{ version }}_linux_amd64.tar.gz"
+        dest: "{{ user_dir }}"
+        remote_src: yes
+      notify: Remove HemiNetwork tar file
+
+    - name: Create systemd service file for Hemi
+      copy:
+        dest: /etc/systemd/system/hemi.service
+        content: |
+          [Unit]
+          Description=Hemi
+          After=network-online.target
+
+          [Service]
+          User={{ user_name }}
+          WorkingDirectory={{ user_dir }}/heminetwork_{{ version }}_linux_amd64
+          ExecStart={{ user_dir }}/heminetwork_{{ version }}_linux_amd64/popmd
+          Restart=always
+          RestartSec=3
+          LimitNOFILE=4096
+          Environment="POPM_BTC_PRIVKEY={{ priv_key }}"
+          Environment="POPM_STATIC_FEE={{ fee }}"
+          Environment="POPM_BFG_URL=wss://testnet.rpc.hemi.network/v1/ws/public"
+
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: Enable and start hemi service
+      systemd:
+        name: hemi.service
+        enabled: yes
+        state: started
+        daemon_reload: yes
+
+  handlers:
+    - name: Remove HemiNetwork tar file
+      file:
+        path: "{{ user_dir }}/heminetwork_{{ version }}_linux_amd64.tar.gz"
+        state: absent

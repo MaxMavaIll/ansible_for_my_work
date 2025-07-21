@@ -1,0 +1,33 @@
+---
+  - name: Copy prometheus.yml from remote server to ~/grafana
+    copy:
+      src: prometheus.yml
+      dest: "{{ grafana_dir }}/prometheus.yml"
+    
+  - name: Create file Grafana_data
+    file:
+      path: '{{ grafana_dir }}/grafana_data'
+      state: directory
+      owner: 472
+      group: 472
+      mode: '0775'
+    become: true
+
+  - name: Create file Prometheus_data
+    file:
+      path: "{{ grafana_dir }}/prometheus_data"
+      state: directory
+      owner: nobody
+      group: nogroup
+      mode: '0775'
+    become: true
+  
+  - name: Copy prometheus.yml from remote server to ~/grafana
+    copy:
+      src: datasources.yml
+      dest: "{{ grafana_dir }}/grafana_data/datasources.yml"
+
+  - name: Run docker compose up 
+    shell: docker compose up -d
+    args:
+      chdir: "{{ grafana_dir }}"

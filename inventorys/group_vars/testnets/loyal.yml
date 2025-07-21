@@ -1,0 +1,15 @@
+network: loyal
+folder: '.loyal'
+daemon: loyald
+chain_id: 'loyal-1'
+node_version: 'v0.25.1'
+repo: 'https://github.com/LoyalLabs/loyal'
+binary: https://github.com/LoyalLabs/loyal/releases/download/v0.25.1/loyal_v0.25.1_linux_amd64.tar.gz
+binary_processing: targz
+genesis: 'https://raw.githubusercontent.com/LoyalLabs/net/main/mainnet/genesis.json'
+seeds: 'ade4d8bc8cbe014af6ebdf3cb7b1e9ad36f412c0@testnet-seeds.polkachu.com:17856'
+custom_port_prefix: 178
+
+# [Optional] Snapshot
+snapshot_hour: 7
+snapshot_minute: 30

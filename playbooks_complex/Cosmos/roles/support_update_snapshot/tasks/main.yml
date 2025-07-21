@@ -1,0 +1,88 @@
+- name: Extract filename from snapshot URL
+  when: snapshot_url is defined
+  set_fact:
+    snapshot_name: "{{ snapshot_url | regex_search('([^/]+)$') }}"
+
+- name: print vars
+  debug:
+    msg: |
+      snapshot_url: {{ snapshot_url }} | Extracted filename is: {{ snapshot_name }}  
+
+- name: Download {{ network }} snapshot
+  when: snapshot_url is defined
+  get_url:
+    url: '{{ snapshot_url }}'
+    dest: "{{ user_dir }}/{{ snapshot_name }}"
+    force: yes
+
+- name: stop cosmovisor service
+  become: true
+  systemd:
+    name: '{{ network }}-{{ main_or_test }}'
+    state: stopped
+    daemon_reload: yes
+    enabled: yes
+
+- name: Ensure snapshot backup directory exists
+  file:
+    path: "{{ user_dir }}/{{ folder }}/snapshot_backups"
+    state: directory
+    mode: '0755'
+
+- name: Stat existing snapshot file
+  stat:
+    path: "{{ user_dir }}/{{ folder }}/data"
+  register: old_snapshot
+
+- name: Archive old snapshot instead of deleting
+  command: >
+    mv
+    "{{ user_dir }}/{{ folder }}/data"
+    "{{ user_dir }}/{{ folder }}/snapshot_backups/{{ snapshot_name }}.{{ ansible_date_time.iso8601_basic }}"
+  when: old_snapshot.stat.exists
+
+# - name: Remove data
+#   when: snapshot_url is defined
+#   shell: rm -rf {{ user_dir }}/{{ folder }}/data
+
+- name: Unpack the {{ network }} snapshot
+  when: snapshot_url is defined 
+  shell: lz4 -c -d {{ user_dir }}/{{ snapshot_name }} | tar -x -C "{{ user_dir }}/{{ folder }}"
+  args:
+    chdir: "{{ user_dir }}"
+  register: unpack_result
+
+- name: Debug output of unpacking
+  when: snapshot_url is defined 
+  debug:
+    var: unpack_result.stdout 
+
+- name: Remove snapshot.tar
+  when: snapshot_url is defined
+  shell: rm {{ user_dir }}/{{ snapshot_name }}
+
+- name: Install {{ network }} addrbook
+  when: addrbook_url is defined
+  get_url:
+    url: '{{ addrbook_url }}'
+    dest: "{{ user_dir }}/addrbook.json"
+    force: yes
+
+- name: Move addrbook.json to the config directory
+  when: addrbook_url is defined
+  copy:
+    src: "{{ user_dir }}/addrbook.json"
+    dest: "{{ user_dir }}/{{ folder }}/config/addrbook.json"
+    remote_src: yes
+
+- name: Remove addrbook.json
+  when: addrbook_url is defined
+  shell: rm {{ user_dir }}/addrbook.json
+
+- name: start cosmovisor service
+  become: true
+  systemd:
+    name: '{{ network }}-{{ main_or_test }}'
+    state: restarted
+    daemon_reload: yes
+    enabled: yes

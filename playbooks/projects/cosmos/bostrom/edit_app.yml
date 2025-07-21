@@ -1,0 +1,8 @@
+---
+- name: Manage Bostrom Docker container
+  hosts: all
+  become: yes
+  tasks:
+    - name: edit
+      shell: |
+        sed -i 's|minimum-gas-prices = ""|minimum-gas-prices = "0boot"|' {{ user_dir }}/.cyber/config/app.toml 

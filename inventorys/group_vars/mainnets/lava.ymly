@@ -1,0 +1,18 @@
+
+# Binary needs to be built with "make build-linux"
+network: lava
+folder: '.lava'
+daemon: lavad
+chain_id: lava-mainnet-1
+node_version: v0.33.1
+repo: https://github.com/lavanet/lava
+genesis: 'https://storage.googleapis.com/lavanet-public-asssets/tge/genesis.json'
+seeds: 'dcbfb490ea930fe9e8058089e3f6a14ca274c1c4@217.182.136.79:26656'
+peers: 'dcbfb490ea930fe9e8058089e3f6a14ca274c1c4@217.182.136.79:26656,1105d3a3384edaa450f4f63c2b1ff08d366ee256@159.203.86.102:26656,e94feefdb4f9b2fac84cf3fc0b1795ce03bb82c2@84.17.42.200:56456,4ccd7bd3547fd27975fa5e4ad5f8360ab0b27450@89.58.50.169:26656,a4e00b4698cb0eaf81e3511a060b3425bf7ed2f5@176.103.222.113:26656,deaeb9474a0d13359a7e1c3c8aa8ea2c8e153af6@86.111.48.98:26656,b1f632d036aa96682d5c21f81c27271322a69059@141.95.11.193:26656,859a5b9a8c3d9ef51abbf8c0ef29bdf3eaf142af@35.224.202.186,0b7fbcf2862f6049581ae23ea78c487069945a0b@195.14.6.50:26007,c514eb2ab50365ad05c953d3d5c439c8187e64c2@103.164.81.49:26656,900e773188de455f78cc716a81a0627417d57978@5.199.172.55:56456,ab6f4f3e0e6bb05a2a81b7c7a85edaea2f02f681@100.67.54.165:26656'
+minimum_gas_price: '0.01ulava'
+#custom_port_prefix: 111
+upgrade_folder: v0.21.0
+
+# [Optional] Snapshot
+snapshot_hour: 1
+snapshot_minute: 30

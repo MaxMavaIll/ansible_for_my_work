@@ -1,0 +1,35 @@
+- name: Execute commands in nwaku-compose directory
+  hosts: all
+  become: yes
+  tasks:
+    # - name: Change directory to nwaku-compose
+    #   command: docker-compose down
+    #   args:
+    #     chdir: "{{ user_dir }}/nwaku-compose"
+
+    # - name: Add repo how is sycure folder Git
+    #   ansible.builtin.shell:
+    #     cmd: git config --global --add safe.directory {{ user_dir }}/nwaku-compose
+
+    # - name: Save uncommitted changes in the local repository
+    #   command: git stash save
+    #   args:
+    #     chdir: "{{ user_dir }}/nwaku-compose"
+
+
+    # - name: Pull the latest changes from the master branch
+    #   ansible.builtin.git:
+    #     repo: 'https://github.com/waku-org/nwaku-compose'
+    #     dest: "{{ user_dir }}/nwaku-compose"
+    #     version: master
+
+    - name: Update ports in docker-compose.yml
+      ansible.builtin.shell: |
+        sed -i -e "s|3000|3100|1" -e "s|4000|4100|1" docker-compose.yml
+      args:
+        chdir: "{{ user_dir }}/nwaku-compose"
+
+    - name: Bring up the services with docker-compose
+      ansible.builtin.shell: docker-compose up -d
+      args:
+        chdir: "{{ user_dir }}/nwaku-compose"

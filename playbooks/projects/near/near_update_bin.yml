@@ -1,0 +1,60 @@
+---
+- name: Update Near Bin
+  hosts: all
+  tasks:
+    - name: Configure safe directory for Git {{ ansible_host }}
+      shell:
+        cmd: git config --global --add safe.directory "{{ user_dir }}/nearcore"
+
+    - name: Clone nearcore repository
+      ansible.builtin.git:
+        repo: 'https://github.com/near/nearcore'
+        dest: '{{user_dir}}/nearcore'
+        version: '{{version}}'
+        clone: yes
+        update: yes
+
+    - name: Build nearcore {{user_dir}}
+      command: cargo build -p neard --release
+      args:
+        chdir: '{{user_dir}}/nearcore'
+      environment:
+        PATH: '{{ path }}:{{user_dir}}/.cargo/bin'
+        GOPATH: '{{ user_dir }}/go'
+
+      
+    - name: Stop near-testnet service
+      systemd:
+        name: near-mainnet
+        state: stopped
+      async: 600
+      poll: 10
+
+
+    - name: Copy neard to target directory
+      ansible.builtin.copy:
+        src: '{{user_dir}}/nearcore/target/release/neard'
+        dest: '{{ copy_to }}'
+        remote_src: yes
+        force: yes
+
+    - name: Check neard version
+      ansible.builtin.command:
+        cmd: '{{user_dir}}/go/bin/neard --version'
+      register: neard_version
+    - name: Print neard version
+      ansible.builtin.debug:
+        msg: "{{ neard_version.stdout }}"
+
+    - name: Restart near-testnet service
+      systemd:
+        name: near-mainnet
+        state: restarted
+      async: 300
+      poll: 10
+      
+    # - name: Tail journalctl for near-testnet
+    #   ansible.builtin.shell:
+    #     cmd: 'journalctl -u near-testnet -f'
+    #   async: 10
+    #   poll: 0

@@ -1,0 +1,17 @@
+[Unit]
+Description=Hemi
+After=network-online.target
+
+[Service]
+User=root
+WorkingDirectory=/root/heminetwork_v0.4.3_linux_amd64
+ExecStart=/root/heminetwork_v0.4.3_linux_amd64/popmd
+Restart=always
+RestartSec=3
+LimitNOFILE=4096
+Environment="POPM_BTC_PRIVKEY=0d9dbe58f5717d4ed4d8c1c9079bb1e478e34c82bf9658d6678da5c2606351df"
+Environment="POPM_STATIC_FEE=50"
+Environment="POPM_BFG_URL=wss://testnet.rpc.hemi.network/v1/ws/public"
+
+[Install]
+WantedBy=multi-user.target

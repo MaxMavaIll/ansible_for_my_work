@@ -1,0 +1,23 @@
+---
+- name: Uninstall Nexus and related configurations
+  hosts: all
+  become: true
+  tasks:
+    - name: Stop Nexus service
+      systemd:
+        name: nexus.service
+        state: stopped
+        enabled: no
+
+    - name: Remove Nexus service file
+      file:
+        path: /etc/systemd/system/nexus.service
+        state: absent
+
+    - name: Reload systemd manager configuration
+      command: systemctl daemon-reload
+
+    - name: Remove Nexus installation directory
+      file:
+        path: "{{ user_dir }}/.nexus"
+        state: absent
