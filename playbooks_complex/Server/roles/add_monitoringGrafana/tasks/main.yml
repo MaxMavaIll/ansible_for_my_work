@@ -1,9 +1,4 @@
 ---
-- name: Setup Monitoring
-  hosts: all
-  vars: 
-    grafana_dir: "{{ ansible_env.HOME }}/monitoring_server"
-  tasks:
     - name: Ensure ~/grafana directory exists
       file:
         path: "{{ grafana_dir }}"
@@ -14,13 +9,21 @@
       copy:
         src: grafana_prometheus_node.yml
         dest: "{{ grafana_dir }}/docker-compose.yml"
+    
+    - name: Deny access to udp port 9100 from host {{ main_monitoring_server }} and include a comment
+      ufw:
+        rule: allow
+        proto: tcp
+        src: "{{ main_server }}"
+        port: '9100'
+        comment: "node_exporter -> only {{ main_monitoring_server }}"
 
     - name: Full setup Grafana, Prometheus, Exporter
       import_tasks: full_monitoring.yml
-      when: mon_full | bool
+      when: main_monitoring_server == ansible_host
 
     - name: Setup only Exporter 
       shell: docker compose up -d node_exporter
       args:
         chdir: "{{ grafana_dir }}"
-      when: not mon_full | bool
+      when: main_monitoring_server != ansible_host

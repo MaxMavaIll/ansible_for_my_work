@@ -3,5 +3,7 @@
   hosts: all
   become: true
   gather_facts: true
+  vars: 
+    grafana_dir: "{{ ansible_env.HOME }}/monitoring_server"
   roles:
-    - settings_server
+    - add_monitoringGrafana
